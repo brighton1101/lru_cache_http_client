@@ -3,7 +3,7 @@ from lru_cache_http_client.http.requests_http_client import HttpClient, Requests
 from lru_cache_http_client.hash.hasher import Hasher
 
 
-class TtlLruHttpClient(HttpClient):
+class LruHttpClient(HttpClient):
     """
     Decorator HTTP Client with a `Least Recently Used Cache` (LRU Cache) to
     cache 'identical' requests sent. By identical, that means the same
