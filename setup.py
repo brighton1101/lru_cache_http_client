@@ -6,6 +6,6 @@ setup(name='lru_cache_http_client',
     author_email='balfrey@usc.edu',
     packages=find_packages(),
     install_requires=[
-        requests>=2.0.0
+        'requests>=2.0'
     ]
 )
