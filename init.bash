@@ -7,3 +7,4 @@ pip3 install -e .
 pip3 install pytest
 pip3 install black
 cp pre-commit .git/hooks/pre-commit
+chmod u+x .git/hooks/pre-commit
