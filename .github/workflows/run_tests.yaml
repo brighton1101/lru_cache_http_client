@@ -27,6 +27,7 @@ jobs:
         # only check package and tests
         black --check lru_cache_http_client
         black --check test
+        black --check examples
     - name: Test with pytest
       run: |
         pytest
