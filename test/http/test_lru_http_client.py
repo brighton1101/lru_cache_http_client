@@ -1,3 +1,4 @@
+from lru_cache_http_client.hash.hasher import Hasher
 from lru_cache_http_client.http.requests_http_client import HttpClient
 from lru_cache_http_client.http.lru_http_client import LruHttpClient
 
@@ -72,3 +73,28 @@ def test_get_no_ttl_diff_params():
     assert(res1 == res3)
     assert(res2 != res3)
 
+
+def test_get_ttl_expired():
+    """
+    Given: User hits caching client with the same url twice.
+           The hashing function returns different values for the
+           current hash (to simulate ttl behavior).
+    Assert: The injected HttpClient's get method is called twice
+    """
+    class TestHttpClient(HttpClient):
+        counter = 0
+        def get(self, url, params=None, **kwargs):
+            self.counter += 1
+            return self.counter
+    class TestHasher(Hasher):
+        counter = 0
+        def get_hash(self):
+            self.counter += 1
+            return self.counter
+    client = TestHttpClient()
+    hasher = TestHasher()
+    caching_client = LruHttpClient(http_client=client, hasher=hasher)
+    res1 = caching_client.get('abc')
+    res2 = caching_client.get('abc')
+    assert(res1 == 1)
+    assert(res2 == 2)
