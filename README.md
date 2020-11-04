@@ -18,7 +18,7 @@
 - Extensible - add your own `HttpClient` or `Hasher` implementation for full control
 
 ### Setting up development environment:
-sh```
+```bash
 # From root directory where `setup.py` is located
 python3 -m venv venv
 pip3 install -e .
