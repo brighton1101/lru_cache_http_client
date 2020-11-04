@@ -1,5 +1,8 @@
 from functools import lru_cache
-from lru_cache_http_client.http.requests_http_client import HttpClient, RequestsHttpClient
+from lru_cache_http_client.http.requests_http_client import (
+    HttpClient,
+    RequestsHttpClient,
+)
 from lru_cache_http_client.hash.hasher import Hasher
 
 
@@ -24,7 +27,7 @@ class LruHttpClient(HttpClient):
 
     capacity = None
 
-    def __init__(self, capacity = 128, http_client = None, hasher = None):
+    def __init__(self, capacity=128, http_client=None, hasher=None):
         """
         :constructor
         :param capacity       - capacity for cache (should be powers of 2
@@ -40,7 +43,7 @@ class LruHttpClient(HttpClient):
         self.hasher = Hasher() if hasher == None else hasher
         self.capacity = capacity
         self._setup_cahcing_func()
-    
+
     def get(self, url, params=None, **kwargs):
         """
         Checks cache for existence of similar request (by method params). If
@@ -55,6 +58,7 @@ class LruHttpClient(HttpClient):
         return self.caching_func(url, params=params, ttl=ttl, **kwargs)
 
     caching_func = None
+
     def _get_caching(self, url, params=None, ttl=None, **kwargs):
         """
         Wrapper method for issuing get requests from http client. DO NOT
@@ -73,6 +77,7 @@ class LruHttpClient(HttpClient):
 def _validate_http_client(http_client):
     if not http_client == None and not isinstance(http_client, HttpClient):
         raise TypeError("Invalid HttpClient provided for `http_client` arg")
+
 
 def _validate_hasher(hasher):
     if not hasher == None and not isinstance(hasher, Hasher):

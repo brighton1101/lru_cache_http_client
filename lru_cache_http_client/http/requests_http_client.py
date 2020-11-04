@@ -1,16 +1,20 @@
 import requests
 
+
 class HttpClient:
     """
     Template interface for valid HttpClients used by the application
     """
+
     def get(self, url, params=None, **kwargs):
         pass
+
 
 class RequestsHttpClient(HttpClient):
     """
     Wrapper class for `requests` http client
     """
+
     def get(self, url, params=None, **kwargs):
         r"""Sends a GET request via 'requests' package
         :see https://requests.readthedocs.io/en/latest/_modules/requests/api/#get

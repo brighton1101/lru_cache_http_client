@@ -2,6 +2,7 @@ class Hasher:
     """
     Interface for creating hashes for application
     """
+
     def get_hash(self):
         """
         By default, return 0. This allows us to inject a dummy hasher

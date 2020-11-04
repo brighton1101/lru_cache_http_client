@@ -1,13 +1,15 @@
 import time
 from lru_cache_http_client.hash.hasher import Hasher
 
+
 class TtlHasher(Hasher):
     """
     Hashing class for computing TTL hashes for application
     By default, the time to live is 3600 seconds
     """
+
     seconds = None
-     
+
     def __init__(self, seconds=3600):
         """
         :constructor
