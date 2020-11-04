@@ -1,0 +1,5 @@
+#!/bin/bash
+
+black lru_cache_http_client
+black test
+pytest

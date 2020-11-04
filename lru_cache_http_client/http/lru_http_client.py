@@ -30,17 +30,17 @@ class LruHttpClient(HttpClient):
     def __init__(self, capacity=128, http_client=None, hasher=None):
         """
         :constructor
-        :param capacity       - capacity for cache (should be powers of 2
-                                for best performance)
-        :param http_client    - optionally inject your own HttpClient implementation
-                                to decorate. by default, uses RequestsHttpClient
-        :param hasher         - optionally inject your own Hasher implementation. useful
-                                for ttl indexing
+        :param capacity     - capacity for cache (should be powers of 2
+                              for best performance)
+        :param http_client  - optionally inject your own HttpClient impl
+                              to decorate. by default, uses RequestsHttpClient
+        :param hasher       - optionally inject your own Hasher implementation
+                              useful for ttl indexing
         """
         _validate_http_client(http_client)
         _validate_hasher(hasher)
-        self.http_client = RequestsHttpClient() if http_client == None else http_client
-        self.hasher = Hasher() if hasher == None else hasher
+        self.http_client = RequestsHttpClient() if http_client is None else http_client
+        self.hasher = Hasher() if hasher is None else hasher
         self.capacity = capacity
         self._setup_cahcing_func()
 
@@ -54,7 +54,7 @@ class LruHttpClient(HttpClient):
         :param **kwargs  - additional args to pass to injected HttpClient
         :return          - return value of injected HttpClient's `get` method
         """
-        ttl = None if self.hasher == None else self.hasher.get_hash()
+        ttl = None if self.hasher is None else self.hasher.get_hash()
         return self.caching_func(url, params=params, ttl=ttl, **kwargs)
 
     caching_func = None
@@ -75,10 +75,10 @@ class LruHttpClient(HttpClient):
 
 
 def _validate_http_client(http_client):
-    if not http_client == None and not isinstance(http_client, HttpClient):
+    if http_client is not None and not isinstance(http_client, HttpClient):
         raise TypeError("Invalid HttpClient provided for `http_client` arg")
 
 
 def _validate_hasher(hasher):
-    if not hasher == None and not isinstance(hasher, Hasher):
+    if hasher is not None and not isinstance(hasher, Hasher):
         raise TypeError("Invalid Hashing class provided for `hasher` arg.")

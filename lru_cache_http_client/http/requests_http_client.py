@@ -17,7 +17,7 @@ class RequestsHttpClient(HttpClient):
 
     def get(self, url, params=None, **kwargs):
         r"""Sends a GET request via 'requests' package
-        :see https://requests.readthedocs.io/en/latest/_modules/requests/api/#get
+        https://requests.readthedocs.io/en/latest/_modules/requests/api/#get
         :param url: URL for the new :class:`Request` object.
         :param params: (optional) Dictionary, list of tuples or bytes to send
             in the query string for the :class:`Request`.
