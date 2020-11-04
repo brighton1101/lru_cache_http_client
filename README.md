@@ -20,7 +20,7 @@
 ### Setting up development environment:
 ```bash
 # From root directory where `setup.py` is located
-python3 -m venv venv
-pip3 install -e .
-pip3 install pytest # for testing via pytest
+chmod u+x init.bash
+./init.bash
+source venv/bin/activate
 ```
