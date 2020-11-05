@@ -40,5 +40,26 @@ def no_ttl_multiple():
     print("\n")
 
 
+def ttl_google():
+    URL = "https://www.google.com"
+    caching_client = get_caching_client(capacity=2, ttl_seconds=1)
+    print("With TTL policy of 1 second")
+    print("Issuing first req to google...")
+    res1 = caching_client.get(URL)
+    print("Now sleeping for two seconds")
+    time.sleep(2)
+    start = time.time()
+    print("Issuing second req to google...")
+    res2 = caching_client.get(URL)
+    finish = time.time()
+    print(
+        "Response object 1 vs 2 is {}".format(
+            "different" if res1 != res2 else "the same"
+        )
+    )
+    assert res1 != res2
+
+
 if __name__ == "__main__":
     no_ttl_multiple()
+    ttl_google()
