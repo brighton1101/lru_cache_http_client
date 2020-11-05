@@ -19,7 +19,31 @@ def no_ttl_google():
     print("Time for initial request: {}".format(after_req_1 - start))
     print("Time for duplicate request: {}".format(finish - after_req_1))
     print("Total time: {}".format(finish - start))
+
+def ttl_google():
+    URL = "https://www.google.com"
+    caching_client = get_caching_client(capacity=2, ttl_seconds=1)
+    print("With TTL policy of 1 second")
+    print("Issuing first req to google...")
+    res1 = caching_client.get(URL)
+    print("Now sleeping for two seconds")
+    time.sleep(2)
+    start = time.time()
+    print("Issuing second req to google...")
+    res2 = caching_client.get(URL)
+    finish = time.time()
+    # `res1` will be different than `res2` because
+    # a second request will be issued.
+    # `res1` expires in the cache due to the ttl policy
+    print(
+        "Response object 1 vs 2 is {}".format(
+            "different" if res1 != res2 else "the same"
+        )
+    )
+    assert res1 != res2
 ```
+- See [requests api for get requests](https://requests.readthedocs.io/en/latest/_modules/requests/api/#get) for valid parameters
+- Note that it is possible to write your own HTTP client if using `requests` is not a possibility for your project
 
 ### Use cases:
 - Web scraping
