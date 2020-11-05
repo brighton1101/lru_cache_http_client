@@ -1,6 +1,7 @@
 from lru_cache_http_client.hash.ttl_hasher import TtlHasher
 import time
 
+
 def test_get_hash_within_window():
     """
     Given: - user creates an instance of `TtlHasher` with 1
@@ -11,7 +12,7 @@ def test_get_hash_within_window():
     hasher = TtlHasher(seconds=1)
     hash1 = hasher.get_hash()
     hash2 = hasher.get_hash()
-    assert(hash1 == hash2)
+    assert hash1 == hash2
 
 
 def test_get_hash_outside_window():
@@ -25,4 +26,4 @@ def test_get_hash_outside_window():
     hash1 = hasher.get_hash()
     time.sleep(1)
     hash2 = hasher.get_hash()
-    assert(hash1 != hash2)
+    assert hash1 != hash2
