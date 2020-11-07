@@ -102,7 +102,7 @@ def test_get_ttl_expired():
     class TestHasher(Hasher):
         counter = 0
 
-        def get_hash(self):
+        def get_hash(self, *args, **kwargs):
             self.counter += 1
             return self.counter
 

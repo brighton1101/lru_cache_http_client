@@ -17,7 +17,7 @@ class TtlHasher(Hasher):
         """
         self.seconds = seconds
 
-    def get_hash(self):
+    def get_hash(self, *args, **kwargs):
         """
         Gets hash value based on current time
         """

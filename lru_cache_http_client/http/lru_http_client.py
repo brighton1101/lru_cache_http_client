@@ -54,7 +54,7 @@ class LruHttpClient(HttpClient):
         :param **kwargs  - additional args to pass to injected HttpClient
         :return          - return value of injected HttpClient's `get` method
         """
-        ttl = None if self.hasher is None else self.hasher.get_hash()
+        ttl = None if self.hasher is None else self.hasher.get_hash(url, params, **kwargs)
         return self.caching_func(url, params=params, ttl=ttl, **kwargs)
 
     caching_func = None
