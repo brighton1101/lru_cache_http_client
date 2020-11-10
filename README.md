@@ -60,6 +60,11 @@ def ttl_google():
 - Specify an optional TTL policy for cache (in seconds)
 - Extensible - add your own `HttpClient` or `Hasher` implementation for full control
 
+### Current known issues:
+- Not all `params` passed into `requests.get` are of type `dict`
+- `_UrlParams_hashabledict` should allow for other primitive hashable types
+- Certain `**kwargs` passed down into `requests.get` are unhashable and will raise exception - `headers`, `cookies`, `auth?`, `proxies` - similar solution to `_UrlParams_hashabledict` may fix it
+
 ### Setting up development environment:
 ```bash
 # From root directory where `setup.py` is located

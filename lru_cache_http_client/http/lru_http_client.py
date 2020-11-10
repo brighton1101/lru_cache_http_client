@@ -57,7 +57,9 @@ class LruHttpClient(HttpClient):
         ttl = (
             None if self.hasher is None else self.hasher.get_hash(url, params, **kwargs)
         )
-        return self.caching_func(url, params=params, ttl=ttl, **kwargs)
+        # Convert url params to be a hashable type
+        frozen_params = _UrlParams_hashabledict(params)
+        return self.caching_func(url, params=frozen_params, ttl=ttl, **kwargs)
 
     caching_func = None
 
@@ -74,6 +76,32 @@ class LruHttpClient(HttpClient):
         Setup LRU cache
         """
         self.caching_func = lru_cache(maxsize=self.capacity)(self._get_caching)
+
+
+class _UrlParams_hashabledict(dict):
+    """
+    Helper wrapper around dict class to make it hashable.
+    Note that all items in dict must be of type str for this
+    to work
+    """
+
+    def __init__(self, unhashable_dict=None):
+        """
+        Given a dict, or missing val, instantiate a dict
+        that can be hashed. Useful for caching method above
+        """
+        if unhashable_dict is None:
+            unhashable_dict = {}
+        dict_items = unhashable_dict.items()
+        for key, val in dict_items:
+            if not isinstance(key, str) or not isinstance(val, str):
+                raise TypeError(
+                    'Invalid URL Params: key, val pairs should be of type "str"'
+                )
+        super().__init__(dict_items)
+
+    def __hash__(self):
+        return hash(frozenset(sorted(self.items())))
 
 
 def _validate_http_client(http_client):
