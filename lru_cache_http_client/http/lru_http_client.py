@@ -1,4 +1,5 @@
 from functools import lru_cache
+from collections.abc import Hashable
 from lru_cache_http_client.http.requests_http_client import (
     HttpClient,
     RequestsHttpClient,
@@ -54,12 +55,29 @@ class LruHttpClient(HttpClient):
         :param **kwargs  - additional args to pass to injected HttpClient
         :return          - return value of injected HttpClient's `get` method
         """
+        # kwargs of type `dict` that need to be hashed
+        dict_kwargs = ["headers", "cookies", "proxies"]
+
         ttl = (
             None if self.hasher is None else self.hasher.get_hash(url, params, **kwargs)
         )
-        # Convert url params to be a hashable type
-        frozen_params = _UrlParams_hashabledict(params)
-        return self.caching_func(url, params=frozen_params, ttl=ttl, **kwargs)
+
+        # params needs to be hashable
+        if params is not None:
+            if isinstance(params, dict):
+                params = _RequestsArg_hashabledict(params)
+            elif isinstance(params, list):
+                params = tuple(params)
+
+        # certain possible kwargs need to be converted to hashable
+        # type, notable `dict` kwargs
+        for key, value in kwargs.items():
+            if key not in dict_kwargs:
+                continue
+            elif isinstance(value, dict):
+                kwargs[key] = _RequestsArg_hashabledict(value)
+
+        return self.caching_func(url, params=params, ttl=ttl, **kwargs)
 
     caching_func = None
 
@@ -78,7 +96,7 @@ class LruHttpClient(HttpClient):
         self.caching_func = lru_cache(maxsize=self.capacity)(self._get_caching)
 
 
-class _UrlParams_hashabledict(dict):
+class _RequestsArg_hashabledict(dict):
     """
     Helper wrapper around dict class to make it hashable.
     Note that all items in dict must be of type str for this
@@ -94,10 +112,8 @@ class _UrlParams_hashabledict(dict):
             unhashable_dict = {}
         dict_items = unhashable_dict.items()
         for key, val in dict_items:
-            if not isinstance(key, str) or not isinstance(val, str):
-                raise TypeError(
-                    'Invalid URL Params: key, val pairs should be of type "str"'
-                )
+            if not isinstance(key, Hashable) or not isinstance(val, Hashable):
+                raise TypeError("Unhashable params passed into function")
         super().__init__(dict_items)
 
     def __hash__(self):

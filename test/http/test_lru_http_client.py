@@ -34,7 +34,7 @@ def test_invalid_hasher():
         LruHttpClient(hasher=Dummy())
 
 
-def test_no_ttl_same_req():
+def test_same_req():
     """
     Given: User hits caching client with same url twice in a row.
            Successive (uncached) requests to HttpClient will return
@@ -52,36 +52,20 @@ def test_no_ttl_same_req():
     client = TestHttpClient()
     caching_client = LruHttpClient(http_client=client)
     url = "example.com"
-    res1 = caching_client.get(url)
-    res2 = caching_client.get(url)
+    url_params = {"hello": "params"}
+    cookies = {"hello": "cookies"}
+    proxies = {"hello": "proxies"}
+    headers = {"hello": "headers"}
+    res1 = caching_client.get(
+        url, params=url_params, cookies=cookies, proxies=proxies, headers=headers
+    )
+    res2 = caching_client.get(
+        url, params=url_params, cookies=cookies, proxies=proxies, headers=headers
+    )
     assert res1 == res2
 
 
-def test_no_ttl_same_req_url_params():
-    """
-    Given: User hits caching client with same url and url params dict
-           twice in a row. Successive (uncached) requests to HttpClient
-           will return different results
-    Assert: Both responses are the same due to caching
-    """
-
-    class TestHttpClient(HttpClient):
-        count = 1
-
-        def get(self, url, params=None, **kwargs):
-            self.count += 1
-            return self.count
-
-    url = "test.com"
-    client = TestHttpClient()
-    caching_client = LruHttpClient(http_client=client)
-    url_params = {"hello": "world"}
-    res1 = caching_client.get(url, params=url_params)
-    res2 = caching_client.get(url, params=url_params)
-    assert res1 == res2
-
-
-def test_get_diff_req():
+def test_diff_req():
     """
     Given: User hits caching client with two different urls three
            times. Successive requests to HttpClient injected into
@@ -106,13 +90,12 @@ def test_get_diff_req():
     assert res2 != res3
 
 
-def test_get_same_url_diff_url_params():
+def test_req_url_params_list():
     """
-    Given: User hits caching client with same URL twice, but
-           different URL params. Successive requests to injected
-           HttpClient will return different results
-    Assert: They are treated as unique requests and get unique
-            responses.
+    Given: User hits caching client with same url twice, with
+           url params supplied as unhashable type `list`
+    Assert: LruHttpClient is able to make the list hashable
+            and caches the request
     """
 
     class TestHttpClient(HttpClient):
@@ -124,10 +107,11 @@ def test_get_same_url_diff_url_params():
 
     client = TestHttpClient()
     caching_client = LruHttpClient(http_client=client)
-    url = "test.come"
-    res1 = caching_client.get(url, params={"a": "b"})
-    res2 = caching_client.get(url, params={"a": "c"})
-    assert res1 != res2
+    url_params = [("a", "b"), ("c", "d")]
+    url = "test.com"
+    res1 = caching_client.get(url, params=url_params)
+    res2 = caching_client.get(url, params=url_params)
+    assert res1 == res2
 
 
 def test_ttl_expired():
