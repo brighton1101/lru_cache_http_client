@@ -1,9 +1,8 @@
 from functools import lru_cache
-from collections.abc import Hashable
 from lru_cache_http_client.http.requests_http_client import (
-    HttpClient,
     RequestsHttpClient,
 )
+from lru_cache_http_client.http.http_client import HttpClient
 from lru_cache_http_client.hash.hasher import Hasher
 
 
@@ -55,27 +54,12 @@ class LruHttpClient(HttpClient):
         :param **kwargs  - additional args to pass to injected HttpClient
         :return          - return value of injected HttpClient's `get` method
         """
-        # kwargs of type `dict` that need to be hashed
-        dict_kwargs = ["headers", "cookies", "proxies"]
 
         ttl = (
             None if self.hasher is None else self.hasher.get_hash(url, params, **kwargs)
         )
 
-        # params needs to be hashable
-        if params is not None:
-            if isinstance(params, dict):
-                params = _RequestsArg_hashabledict(params)
-            elif isinstance(params, list):
-                params = tuple(params)
-
-        # certain possible kwargs need to be converted to hashable
-        # type, notable `dict` kwargs
-        for key, value in kwargs.items():
-            if key not in dict_kwargs:
-                continue
-            elif isinstance(value, dict):
-                kwargs[key] = _RequestsArg_hashabledict(value)
+        params, kwargs = self.http_client.make_args_hashable(params=params, **kwargs)
 
         return self.caching_func(url, params=params, ttl=ttl, **kwargs)
 
@@ -94,30 +78,6 @@ class LruHttpClient(HttpClient):
         Setup LRU cache
         """
         self.caching_func = lru_cache(maxsize=self.capacity)(self._get_caching)
-
-
-class _RequestsArg_hashabledict(dict):
-    """
-    Helper wrapper around dict class to make it hashable.
-    Note that all items in dict must be of type str for this
-    to work
-    """
-
-    def __init__(self, unhashable_dict=None):
-        """
-        Given a dict, or missing val, instantiate a dict
-        that can be hashed. Useful for caching method above
-        """
-        if unhashable_dict is None:
-            unhashable_dict = {}
-        dict_items = unhashable_dict.items()
-        for key, val in dict_items:
-            if not isinstance(key, Hashable) or not isinstance(val, Hashable):
-                raise TypeError("Unhashable params passed into function")
-        super().__init__(dict_items)
-
-    def __hash__(self):
-        return hash(frozenset(sorted(self.items())))
 
 
 def _validate_http_client(http_client):
