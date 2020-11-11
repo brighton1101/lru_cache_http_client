@@ -23,8 +23,10 @@ def test_url_params_list():
     """
     reqs_client = RequestsHttpClient()
     url_params = [("a", "b"), ("c", "d")]
-    params, kwargs = reqs_client.make_args_hashable(params=url_params)
+    params, _ = reqs_client.make_args_hashable(params=url_params)
     assert isinstance(params, Hashable)
+    for i in range(0, len(params)):
+        assert url_params[i] == params[i]
 
 
 def test_url_params_dict():
@@ -34,7 +36,7 @@ def test_url_params_dict():
     """
     reqs_client = RequestsHttpClient()
     url_params = {"a": "b"}
-    params, kwargs = reqs_client.make_args_hashable(params=url_params)
+    params, _ = reqs_client.make_args_hashable(params=url_params)
     assert isinstance(params, Hashable)
     assert len(params) == 1
     assert params["a"] == "b"
@@ -62,3 +64,31 @@ def test_hashing_kwargs():
     assert isinstance(kwargs["proxies"], Hashable)
     assert len(kwargs["proxies"]) == 1
     assert kwargs["proxies"]["e"] == 123
+
+
+def test_hashing_dict_same_hash_key():
+    """
+    Given: User makess separate calls to hash a dictionary parameters
+           with dictionaries with the same values
+    Assert: The return values are the same
+    """
+    reqs_client = RequestsHttpClient()
+    url_params = {"a": "b"}
+    url_params_matching = {"a": "b"}
+    params, _ = reqs_client.make_args_hashable(params=url_params)
+    matching_params, _ = reqs_client.make_args_hashable(params=url_params_matching)
+    assert params == matching_params
+
+
+def test_hashing_dict_diff_hash_key():
+    """
+    Given: User makess separate calls to hash a dictionary parameters
+           with dictionaries with the different values
+    Assert: The return values (and hence hashing) are different
+    """
+    reqs_client = RequestsHttpClient()
+    url_params = {"a": "b"}
+    url_params_diff = {"c": "d"}
+    params, _ = reqs_client.make_args_hashable(params=url_params)
+    diff_params, _ = reqs_client.make_args_hashable(params=url_params_diff)
+    assert params != diff_params
