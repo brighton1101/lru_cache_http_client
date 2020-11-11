@@ -36,6 +36,8 @@ def test_url_params_dict():
     url_params = {"a": "b"}
     params, kwargs = reqs_client.make_args_hashable(params=url_params)
     assert isinstance(params, Hashable)
+    assert len(params) == 1
+    assert params["a"] == "b"
 
 
 def test_hashing_kwargs():
@@ -51,5 +53,12 @@ def test_hashing_kwargs():
     params, kwargs = reqs_client.make_args_hashable(
         params=url_params, cookies=cookies, headers=headers, proxies=proxies
     )
-    for key, val in kwargs.items():
-        assert isinstance(params, Hashable)
+    assert isinstance(kwargs["headers"], Hashable)
+    assert len(kwargs["headers"]) == 1
+    assert kwargs["headers"]["a"] == "b"
+    assert isinstance(kwargs["cookies"], Hashable)
+    assert len(kwargs["cookies"]) == 1
+    assert kwargs["cookies"]["c"] == "d"
+    assert isinstance(kwargs["proxies"], Hashable)
+    assert len(kwargs["proxies"]) == 1
+    assert kwargs["proxies"]["e"] == 123
