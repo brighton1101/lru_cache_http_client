@@ -1,8 +1,8 @@
 from functools import lru_cache
 from lru_cache_http_client.http.requests_http_client import (
-    HttpClient,
     RequestsHttpClient,
 )
+from lru_cache_http_client.http.http_client import HttpClient
 from lru_cache_http_client.hash.hasher import Hasher
 
 
@@ -54,9 +54,13 @@ class LruHttpClient(HttpClient):
         :param **kwargs  - additional args to pass to injected HttpClient
         :return          - return value of injected HttpClient's `get` method
         """
+
         ttl = (
             None if self.hasher is None else self.hasher.get_hash(url, params, **kwargs)
         )
+
+        params, kwargs = self.http_client.make_args_hashable(params=params, **kwargs)
+
         return self.caching_func(url, params=params, ttl=ttl, **kwargs)
 
     caching_func = None
