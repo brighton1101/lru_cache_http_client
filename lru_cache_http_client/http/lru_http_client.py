@@ -5,6 +5,8 @@ from lru_cache_http_client.http.requests_http_client import (
 from lru_cache_http_client.http.http_client import HttpClient
 from lru_cache_http_client.hash.hasher import Hasher
 
+from typing import Optional
+
 
 class LruHttpClient(HttpClient):
     """
@@ -27,7 +29,12 @@ class LruHttpClient(HttpClient):
 
     capacity = None
 
-    def __init__(self, capacity=128, http_client=None, hasher=None):
+    def __init__(
+        self,
+        capacity: int = 128,
+        http_client: Optional[HttpClient] = None,
+        hasher: Optional[Hasher] = None,
+    ):
         """
         :constructor
         :param capacity     - capacity for cache (should be powers of 2
@@ -44,7 +51,7 @@ class LruHttpClient(HttpClient):
         self.capacity = capacity
         self._setup_cahcing_func()
 
-    def get(self, url, params=None, **kwargs):
+    def get(self, url: str, params: Optional[dict] = None, **kwargs):
         """
         Checks cache for existence of similar request (by method params). If
         similar request exists, the Response is returned from the cache. If

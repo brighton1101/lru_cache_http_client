@@ -1,5 +1,6 @@
 import time
 from lru_cache_http_client.hash.hasher import Hasher
+from typing import Optional
 
 
 class TtlHasher(Hasher):
@@ -8,14 +9,14 @@ class TtlHasher(Hasher):
     By default, the time to live is 3600 seconds
     """
 
-    seconds = None
+    seconds: int = 3600
 
-    def __init__(self, seconds=3600):
+    def __init__(self, seconds: Optional[int] = None):
         """
         :constructor
         :param seconds - # of seconds that object should live for
         """
-        self.seconds = seconds
+        self.seconds = self.seconds if seconds is None else seconds
 
     def get_hash(self, *args, **kwargs):
         """
