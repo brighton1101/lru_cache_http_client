@@ -18,17 +18,9 @@ class TestHttpClient(HttpClient):
     count = 1
 
     def get(self, url, params=None, **kwargs):
+        assert url != ""
         self.count += 1
         return self.count
-
-    def make_args_hashable(self, params=None, **kwargs):
-        """
-        Hashability tests are outside of the scope of the test suite
-        """
-        for key, val in kwargs.items():
-            if not isinstance(val, Hashable):
-                kwargs[key] = None
-        return None, kwargs
 
 
 def test_invalid_http_client():
@@ -70,16 +62,8 @@ def test_same_req():
     client = TestHttpClient()
     caching_client = LruHttpClient(http_client=client)
     url = "example.com"
-    url_params = {"hello": "params"}
-    cookies = {"hello": "cookies"}
-    proxies = {"hello": "proxies"}
-    headers = {"hello": "headers"}
-    res1 = caching_client.get(
-        url, params=url_params, cookies=cookies, proxies=proxies, headers=headers
-    )
-    res2 = caching_client.get(
-        url, params=url_params, cookies=cookies, proxies=proxies, headers=headers
-    )
+    res1 = caching_client.get(url)
+    res2 = caching_client.get(url)
     assert res1 == res2
 
 
@@ -117,27 +101,31 @@ def test_req_url_params_list():
     """
     client = TestHttpClient()
     caching_client = LruHttpClient(http_client=client)
-    url_params = [("a", "b"), ("c", "d")]
     url = "test.com"
-    res1 = caching_client.get(url, params=url_params)
-    res2 = caching_client.get(url, params=url_params)
+    res1 = caching_client.get(url)
+    res2 = caching_client.get(url)
     assert res1 == res2
 
 
-def test_ttl_expired():
+def test_setup_called():
     """
     Given: User hits caching client with the same url twice.
            The hashing function returns different values for the
-           current hash (to simulate ttl behavior).
+           current parameters passed in
     Assert: The injected HttpClient's get method is called twice
     """
 
     class TestHasher(Hasher):
         counter = 0
 
-        def get_hash(self, *args, **kwargs):
+        def setup(self, *args, **kwargs):
             self.counter += 1
-            return self.counter
+            kwargs["test_ttl"] = self.counter
+            return args, kwargs
+
+        def teardown(self, *args, **kwargs):
+            del kwargs["test_ttl"]
+            return args, kwargs
 
     client = TestHttpClient()
     hasher = TestHasher()
@@ -146,3 +134,22 @@ def test_ttl_expired():
     res2 = caching_client.get("abc")
     assert res1 == 2
     assert res2 == 3
+
+
+def test_teardown_called():
+    """
+    Given: User hits caching client injected with hasher that's
+           teardown method turns url into `None` val. Injected
+           HttpClient will raise Exception if `None` is passed in
+    Assert: AssertionError raised
+    """
+
+    class TestHasher(Hasher):
+        def teardown(self, *args, **kwargs):
+            return ("",), kwargs
+
+    client = TestHttpClient()
+    hasher = TestHasher()
+    caching_client = LruHttpClient(http_client=client, hasher=hasher)
+    with pytest.raises(AssertionError):
+        caching_client.get("hello world")
