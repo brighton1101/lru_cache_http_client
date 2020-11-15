@@ -28,6 +28,10 @@ class HasherManager(Hasher):
 
 
 class _HasherManagerBuilder:
+    """
+    Builder class for constructing an instance of `HasherManager`
+    """
+
     _hashers = []
 
     def add_hasher(self, hasher):
