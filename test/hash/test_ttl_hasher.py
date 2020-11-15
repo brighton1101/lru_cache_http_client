@@ -10,8 +10,10 @@ def test_get_hash_within_window():
     Assert: Hash is the same within one second interval
     """
     hasher = TtlHasher(seconds=1)
-    hash1 = hasher.get_hash()
-    hash2 = hasher.get_hash()
+    _, kwargs1 = hasher.setup()
+    _, kwargs2 = hasher.setup()
+    hash1 = kwargs1[hasher.TTL_PARAM_NAME]
+    hash2 = kwargs2[hasher.TTL_PARAM_NAME]
     assert hash1 == hash2
 
 
@@ -23,7 +25,9 @@ def test_get_hash_outside_window():
     Assert: Hash is different
     """
     hasher = TtlHasher(seconds=1)
-    hash1 = hasher.get_hash()
+    _, kwargs1 = hasher.setup()
     time.sleep(1)
-    hash2 = hasher.get_hash()
+    _, kwargs2 = hasher.setup()
+    hash1 = kwargs1[hasher.TTL_PARAM_NAME]
+    hash2 = kwargs2[hasher.TTL_PARAM_NAME]
     assert hash1 != hash2

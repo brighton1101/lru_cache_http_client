@@ -2,6 +2,10 @@ from lru_cache_http_client.hash.hasher import Hasher
 
 
 class HasherManager(Hasher):
+    """
+    An aggreagate Hasher, for applying multiple transformations
+    to hash args
+    """
 
     hashers: tuple = ()
 

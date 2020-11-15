@@ -22,14 +22,14 @@ class TtlHasher(Hasher):
         self.seconds = self.seconds if seconds is None else seconds
 
     def setup(self, *args, **kwargs):
-        kwargs[self.TTL_PARAM_NAME] = self.get_hash(args, kwargs)
+        kwargs[self.TTL_PARAM_NAME] = self._get_hash(args, kwargs)
         return args, kwargs
 
     def teardown(self, *args, **kwargs):
         del kwargs[self.TTL_PARAM_NAME]
         return args, kwargs
 
-    def get_hash(self, *args, **kwargs):
+    def _get_hash(self, *args, **kwargs):
         """
         Gets hash value based on current time
         """
