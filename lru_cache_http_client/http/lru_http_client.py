@@ -41,13 +41,13 @@ class LruHttpClient(HttpClient):
                               for best performance)
         :param http_client  - optionally inject your own HttpClient impl
                               to decorate. by default, uses RequestsHttpClient
-        :param hasher       - optionally inject your own Hasher implementation
+        :param hasher       - optionally inject your own HasherManager implementation
                               useful for ttl indexing
         """
         _validate_http_client(http_client)
         _validate_hasher(hasher)
         self.http_client = RequestsHttpClient() if http_client is None else http_client
-        self.hasher = Hasher() if hasher is None else hasher
+        self.hasher = hasher if hasher is not None else Hasher()
         self.capacity = capacity
         self._setup_cahcing_func()
 
@@ -62,23 +62,20 @@ class LruHttpClient(HttpClient):
         :return          - return value of injected HttpClient's `get` method
         """
 
-        ttl = (
-            None if self.hasher is None else self.hasher.get_hash(url, params, **kwargs)
-        )
+        args, kwargs = self.hasher.setup(url, params=params, **kwargs)
 
-        params, kwargs = self.http_client.make_args_hashable(params=params, **kwargs)
-
-        return self.caching_func(url, params=params, ttl=ttl, **kwargs)
+        return self.caching_func(*args, **kwargs)
 
     caching_func = None
 
-    def _get_caching(self, url, params=None, ttl=None, **kwargs):
+    def _get_caching(self, url, **kwargs):
         """
         Wrapper method for issuing get requests from http client. DO NOT
         call directly, but rather call through the caching_func property
         that is set at runtime
         """
-        return self.http_client.get(url, params=params, **kwargs)
+        args, kwargs = self.hasher.teardown(url, **kwargs)
+        return self.http_client.get(*args, **kwargs)
 
     def _setup_cahcing_func(self):
         """
@@ -94,4 +91,4 @@ def _validate_http_client(http_client):
 
 def _validate_hasher(hasher):
     if hasher is not None and not isinstance(hasher, Hasher):
-        raise TypeError("Invalid Hashing class provided for `hasher` arg.")
+        raise TypeError("Invalid HasherManager class provided for `hasher` arg.")

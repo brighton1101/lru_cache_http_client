@@ -11,6 +11,9 @@ class TtlHasher(Hasher):
 
     seconds: int = 3600
 
+    # Should be treated as a Final val and not modified at runtime
+    TTL_PARAM_NAME: str = "TTL_INDEX"
+
     def __init__(self, seconds: Optional[int] = None):
         """
         :constructor
@@ -18,7 +21,15 @@ class TtlHasher(Hasher):
         """
         self.seconds = self.seconds if seconds is None else seconds
 
-    def get_hash(self, *args, **kwargs):
+    def setup(self, *args, **kwargs):
+        kwargs[self.TTL_PARAM_NAME] = self._get_hash(args, kwargs)
+        return args, kwargs
+
+    def teardown(self, *args, **kwargs):
+        del kwargs[self.TTL_PARAM_NAME]
+        return args, kwargs
+
+    def _get_hash(self, *args, **kwargs):
         """
         Gets hash value based on current time
         """
