@@ -44,10 +44,10 @@ class LruHttpClient(HttpClient):
         :param hasher       - optionally inject your own HasherManager implementation
                               useful for ttl indexing
         """
-        _validate_http_client(http_client)
-        _validate_hasher(hasher)
         self.http_client = RequestsHttpClient() if http_client is None else http_client
-        self.hasher = hasher if hasher is not None else Hasher()
+        self.hasher = Hasher() if hasher is None else hasher
+        HttpClient.validate_http_client(self.http_client)
+        Hasher.validate_hasher(self.hasher)
         self.capacity = capacity
         self._setup_cahcing_func()
 
@@ -82,13 +82,3 @@ class LruHttpClient(HttpClient):
         Setup LRU cache
         """
         self.caching_func = lru_cache(maxsize=self.capacity)(self._get_caching)
-
-
-def _validate_http_client(http_client):
-    if http_client is not None and not isinstance(http_client, HttpClient):
-        raise TypeError("Invalid HttpClient provided for `http_client` arg")
-
-
-def _validate_hasher(hasher):
-    if hasher is not None and not isinstance(hasher, Hasher):
-        raise TypeError("Invalid HasherManager class provided for `hasher` arg.")

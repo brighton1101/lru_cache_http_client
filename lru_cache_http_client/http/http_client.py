@@ -9,8 +9,6 @@ class HttpClient:
     def get(self, url: str, params: Optional[dict] = None, **kwargs):
         pass
 
-    def make_args_hashable(self, params=None, **kwargs):
-        """
-        Given keyword args, make them all hashable
-        """
-        return params, kwargs
+    @staticmethod
+    def validate_http_client(http_client):
+        assert isinstance(http_client, HttpClient), "Invalid instance of HttpClient"

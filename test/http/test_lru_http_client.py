@@ -33,7 +33,7 @@ def test_invalid_http_client():
     class Dummy:
         pass
 
-    with pytest.raises(TypeError):
+    with pytest.raises(AssertionError):
         LruHttpClient(http_client=Dummy())
 
 
@@ -47,7 +47,7 @@ def test_invalid_hasher():
     class Dummy:
         pass
 
-    with pytest.raises(TypeError):
+    with pytest.raises(AssertionError):
         LruHttpClient(hasher=Dummy())
 
 
